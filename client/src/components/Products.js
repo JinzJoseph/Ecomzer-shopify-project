@@ -20,7 +20,7 @@ const Products = ({products}) => {
             <div className="max-w-screen-xl mx-auto grid grid-cols-4 gap-10 py-10">
      {
  products.map((item)=>(
-  <ProductsCard key={item._id}   product={item}/>
+  <ProductsCard key={item._id}  product={item}/>
  ))
 
 
