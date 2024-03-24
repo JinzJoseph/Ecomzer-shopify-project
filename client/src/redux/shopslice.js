@@ -39,10 +39,15 @@ export const shopSlice = createSlice({
         if(item){
             item.quantity--;
         }
-    }
+    }, addUser: (state, action) => {
+      state.userInfo = action.payload;
+    }, 
+    removeUser: (state) => {
+      state.userInfo = null;
+    },
 
   },
 });
 
-export const { addToCart,deleteItem,resetCart,increamentQuantity ,decrementQuantity} = shopSlice.actions;
+export const { addToCart,deleteItem,resetCart,increamentQuantity ,decrementQuantity,addUser,removeUser} = shopSlice.actions;
 export default shopSlice.reducer;
