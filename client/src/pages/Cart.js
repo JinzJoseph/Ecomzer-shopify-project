@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import CartItem from "../components/CartItem";
 import { useSelector } from "react-redux";
-
+import { ToastContainer, toast } from "react-toastify";
+import StripeCheckout from "react-stripe-checkout";
+import axios from "axios";
 const Cart = () => {
+  const [payNow, setPayNow] = useState(false);
   const [totalAmt, setTotalAmt] = useState("");
-  const productData = useSelector((state)=>state.shopify.productData)
+  const productData = useSelector((state) => state.shopify.productData);
+  const userInfo = useSelector((state) => state.shopify.userInfo);
   useEffect(() => {
     let price = 0;
     productData.map((item) => {
@@ -13,6 +17,23 @@ const Cart = () => {
     });
     setTotalAmt(price.toFixed(2));
   }, [productData]);
+
+  const handleCheckout = () => {
+    if (userInfo) {
+      setPayNow(true);
+    } else {
+      toast.error("Please sign in to Checkout");
+    }
+  };
+
+  const payment = async(token) => {
+    console.log("token"+token)
+    await axios.post("http://localhost:8000/pay", {
+      amount: totalAmt * 100,
+      token: token,
+      
+    });
+  };
   return (
     <div>
       <img
@@ -27,7 +48,10 @@ const Cart = () => {
             <h2 className="text-3xl font-medium ">cart totals</h2>
             <p className="flex items-center gap-4  font-bold  text-base">
               Subtotal{" "}
-              <span className="font-titleFont font-bold text-lg">    RS:{totalAmt}</span>
+              <span className="font-titleFont font-bold text-lg">
+                {" "}
+                RS:{totalAmt}
+              </span>
             </p>
             <p className="flex items-start gap-4 font-bold  text-base">
               Shipping{" "}
@@ -40,11 +64,39 @@ const Cart = () => {
           <p className="  font-bold  flex justify-between mt-6">
             Total <span className="text-xl font-bold"> RS: {totalAmt}/-</span>
           </p>
-          <button className="text-base bg-black text-white w-full py-3 mt-6 hover:bg-gray-800 duration-300">
+          <button
+            onClick={handleCheckout}
+            className="text-base bg-black text-white w-full py-3 mt-6 hover:bg-gray-800 duration-300"
+          >
             proceed to checkout
           </button>
+          {payNow && (
+            <div className="w-full mt-6 flex items-center justify-center">
+              <StripeCheckout
+                stripeKey="pk_test_51OxpWcSJ6EtDEFqq1pgyadUW1yW8vGQ9uIl6oR6UbrZbvZvlJvUmMLxkzuwsVtuujdIkDho7sXsQkNSbH8DGFQBN00A9LNXOEz"
+                name="shopify Online Shopping"
+                amount={totalAmt * 100}
+                label="Pay to shopify"
+                description={`Your Payment amount is Rs: ${totalAmt}`}
+                token={payment}
+                email={userInfo.email}
+              />
+            </div>
+          )}
         </div>
       </div>
+      <ToastContainer
+        position="top-left"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };
